@@ -27,7 +27,7 @@ def call(name, args):
     result = body.get("result", {})
     if body.get("error") or result.get("isError"):
         text = json.dumps(body)
-        if any(s in text.lower() for s in ["404", "not found"]):
+        if any(s in text.lower() for s in ["404", "not found", "the path does not point to a file or directory"]):
             raise FileNotFoundError(name)
         # Never include the request or its authorization header in errors.
         raise RuntimeError("Managed GitHub request failed for " + name)
