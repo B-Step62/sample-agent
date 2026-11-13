@@ -11,3 +11,5 @@ Application dependencies are pinned in `requirements-app.lock`. Install with `pi
 The captured application source is derived from `adamgurary/claude-skills-brief-agent`, revision a880574a83ccf27e498339bd7ac9c35cc2aa0bca, with the conversational entry point captured at f053802cf1b109f87cd85699394a00431a649002. The baseline graph, research logic, prompts and model are preserved. `baseline-provenance.json` records the captured source hash. The serving/authentication transport is additional infrastructure.
 
 All benchmark users and reactions are simulated. Their reactions are evidence to investigate, not human feedback or correctness ground truth.
+
+Databricks Apps uses `pyproject.toml` and `uv.lock` to select Python 3.12, matching the captured runtime. The lock targets the E2 workspace package registry and retains exact package hashes. There is intentionally no `requirements.txt`, which would select the platform Python 3.11 installer.
