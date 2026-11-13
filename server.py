@@ -65,6 +65,7 @@ def execute(turn, authorization):
     capture_token = http_capture.directory.set(folder)
     record = RECEIPTS[turn.request_id]
     record["status"] = "running"
+    terminal = "failed"
     def started(trace_id):
         record["trace_id"] = trace_id
         mlflow.update_current_trace(tags={"dataset_role": turn.role, "caj.run_id": DEPLOYMENT["run_id"]},
@@ -75,17 +76,24 @@ def execute(turn, authorization):
             topic=turn.topic, date=turn.date, on_trace_started=started)
         # reply sets baseline dataset tags after its start callback; correct runtime role explicitly.
         mlflow.set_trace_tag(result["trace_id"], "dataset_role", turn.role)
-        record.update(result, status="completed")
+        record.update(result)
+        terminal = "completed"
     except TurnFailure as error:
-        record.update(status="failed", trace_id=error.trace_id, response=error.response,
+        record.update(trace_id=error.trace_id, response=error.response,
                       error_type=type(error.__cause__).__name__)
     except Exception as error:
-        record.update(status="failed", error_type=type(error).__name__)
+        record.update(error_type=type(error).__name__)
     finally:
-        mlflow.flush_trace_async_logging()
-        record["sources"] = [json.loads(p.read_text()) for p in sorted(folder.glob("*.json"))]
-        github_transport.credential.reset(token)
-        http_capture.directory.reset(capture_token)
+        try:
+            mlflow.flush_trace_async_logging()
+            record["sources"] = [json.loads(p.read_text()) for p in sorted(folder.glob("*.json"))]
+        except Exception as error:
+            terminal = "failed"
+            record["error_type"] = type(error).__name__
+        finally:
+            github_transport.credential.reset(token)
+            http_capture.directory.reset(capture_token)
+            record["status"] = terminal
 
 
 @app.post("/conversations", status_code=202)
