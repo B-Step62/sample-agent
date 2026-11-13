@@ -6,7 +6,7 @@ The Databricks App wrapper exposes authenticated `/health`, `/conversations`, an
 
 The wrapper supplies standard Databricks service-principal credentials for model access and tracing. Public GitHub source reads use the caller's existing managed `system.ai.github` OAuth connection. The traffic runner forwards the caller's workspace authorization to this isolated App in memory for that request; it is never logged or persisted. The adapter preserves queries, sort order, result limits and README truncation. It chooses README files in `.github`, the repository root, then `docs`, preferring README.md. Hacker News and linked pages are fetched directly.
 
-Dependencies are pinned in `requirements.lock`. Install with `pip install --require-hashes -r requirements.lock`.
+Application dependencies are pinned in `requirements-app.lock`. Install with `pip install --require-hashes -r requirements-app.lock`. This differs from the captured `requirements.lock` only in the certifi CA-bundle patch required by Databricks Apps (2026.10.19).
 
 The captured application source is derived from `adamgurary/claude-skills-brief-agent`, revision a880574a83ccf27e498339bd7ac9c35cc2aa0bca, with the conversational entry point captured at f053802cf1b109f87cd85699394a00431a649002. The baseline graph, research logic, prompts and model are preserved. `baseline-provenance.json` records the captured source hash. The serving/authentication transport is additional infrastructure.
 
